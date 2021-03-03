@@ -25,6 +25,12 @@ TCalendario::TCalendario(int dia, int mes, int anyo, char * mensaje){
     }
 }
 
+TCalendario::TCalendario(const TCalendario &obj){
+    this->dia = obj.dia;
+    this->mes = obj.mes;
+    this->anyo = obj.anyo;
+}
+
 TCalendario::~TCalendario(){
     this->dia = 1;
     this->mes = 1;
@@ -33,7 +39,7 @@ TCalendario::~TCalendario(){
 }
 
 bool TCalendario::bisiesto(int anyo){
-    if(anyo % 4 == 0 && anyo % 100 != 0 || anyo % 400 == 0)
+    if(anyo % 4 == 0 && (anyo % 100 != 0 || anyo % 400 == 0))
         return true;
     return false; 
 }
@@ -91,14 +97,70 @@ bool TCalendario::ModMensaje(char * mensaje){
     return modificado;
 }
 
-TCalendario TCalendario::operator+(int cantDias){
-    TCalendario resultado;
+TCalendario& TCalendario::operator=(const TCalendario &obj){
 
-    if(cantDias > 0){
-        TCalendario * tc = new TCalendario(this->dia + cantDias, this->mes, this->anyo, this->mensaje);
-        
-    } 
+    if(this != &obj){   //Protección contra autoasignacion
+        (*this).~TCalendario();
+        this->dia = obj.dia;
+        this->mes = obj.mes;
+        this->anyo = obj.anyo;
+    }
+    return *this;
 }
+
+TCalendario TCalendario::operator+(int cantDias){
+
+}
+
+TCalendario TCalendario::operator-(int cantDias){
+    
+}
+
+//Preincremento
+TCalendario & TCalendario::operator++(){
+    
+}
+
+TCalendario TCalendario::operator++(int cantDias){
+    
+}
+
+TCalendario & TCalendario::operator--(){
+    
+}
+
+TCalendario TCalendario::operator--(int cantDias){
+    
+}
+
+
+bool TCalendario::operator== (const TCalendario &obj){
+    bool same = (dia==obj.dia && mes==obj.mes && anyo==obj.anyo && strcmp(mensaje, obj.mensaje)) ? true : false;
+    return same;
+}
+
+bool TCalendario::operator!= (const TCalendario &obj){
+    return !(*this==obj);
+}
+
+bool TCalendario::operator> (const TCalendario &obj){
+    if(this->anyo > obj.anyo)
+        return true;
+    else if(this->anyo == obj.anyo && this->mes > obj.mes )
+        return true;
+    else if(this->anyo == obj.anyo && this->mes == obj.mes && this->dia > obj.dia)
+        return true;
+    else if(this->anyo == obj.anyo && this->mes == obj.mes && this->dia == obj.dia){
+        
+    }
+
+    return false;
+}
+
+bool TCalendario::operator< (const TCalendario &obj){
+
+}
+
 
 bool TCalendario::EsVacio(){
     if(dia == 1  && mes == 1 && anyo == 1900 && mensaje == NULL)
@@ -106,5 +168,27 @@ bool TCalendario::EsVacio(){
     return false;
 }
 
+ostream& operator<<(ostream &s, const TCalendario &obj){
+    if(obj.dia < 10)
+        s << "0" << obj.dia;
+    else s << obj.dia;
+
+    s << "/";
+
+    if(obj.mes < 10)
+        s << "0" << obj.mes;
+    else s << obj.mes;
+
+    s << "/";
+    s << obj.anyo << " ";
+    s << " \" ";
+    
+    if(obj.mensaje != NULL)
+        s << obj.mensaje;
+    
+    s << " \" ";
+
+    return s;
+}
 
 

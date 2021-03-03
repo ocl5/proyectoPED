@@ -6,7 +6,7 @@
 using namespace std;
 
 class TCalendario {
-    friend ostream & operator<< (ostream &, TCalendario &);
+    friend ostream & operator<< (ostream &, const TCalendario &);
 
     private:
         bool bisiesto (int);
@@ -18,27 +18,27 @@ class TCalendario {
     public:
         TCalendario();
         TCalendario(int, int, int, char *);
-        TCalendario(TCalendario &);
+        TCalendario(const TCalendario &);
         ~TCalendario();
 
-        TCalendario & operator= (TCalendario &);
+        TCalendario & operator= (const TCalendario &);
         
         TCalendario operator+ (int);
         TCalendario operator- (int);
 
         TCalendario operator++ (int);
-        TCalendario operator++ ();
+        TCalendario & operator++ ();
 
         TCalendario operator-- (int);
-        TCalendario operator-- ();
+        TCalendario & operator-- ();
 
         bool ModFecha(int, int, int);
         bool ModMensaje(char *);
 
-        bool operator== (TCalendario &);
-        bool operator!= (TCalendario &);
-        bool operator> (TCalendario &);
-        bool operator< (TCalendario &);
+        bool operator== (const TCalendario &);
+        bool operator!= (const TCalendario &);
+        bool operator> (const TCalendario &);
+        bool operator< (const TCalendario &);
 
         bool EsVacio();
 
