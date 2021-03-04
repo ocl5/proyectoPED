@@ -15,7 +15,12 @@ TCalendario::TCalendario(int dia, int mes, int anyo, char * mensaje){
         this->dia = dia;
         this->mes = mes;
         this->anyo = anyo;
-        this->mensaje = NULL;
+
+        if(mensaje == NULL){
+            this->mensaje = new char[strlen(mensaje)+1];
+            strcpy(this->mensaje, mensaje);
+        }
+        else this->mensaje = NULL;
     }
     else{
         this->dia = 1;
@@ -29,13 +34,21 @@ TCalendario::TCalendario(const TCalendario &obj){
     this->dia = obj.dia;
     this->mes = obj.mes;
     this->anyo = obj.anyo;
+
+    if(obj.mensaje == NULL){
+        this->mensaje = new char[strlen(obj.mensaje)+1];
+        strcpy(this->mensaje, obj.mensaje);
+    }
+    else this->mensaje = NULL;
 }
 
 TCalendario::~TCalendario(){
     this->dia = 1;
     this->mes = 1;
     this->anyo = 1900;
-    this->mensaje = NULL;
+
+    if(this->mensaje != NULL)
+        delete [] this->mensaje;
 }
 
 bool TCalendario::bisiesto(int anyo){
@@ -91,7 +104,10 @@ bool TCalendario::ModMensaje(char * mensaje){
         modificado = true;
     }
     else{
-        this->mensaje = mensaje;
+        delete [] this->mensaje;
+        this->mensaje = new char[strlen(mensaje)];
+        strcpy(this->mensaje, mensaje);
+
         modificado = true;
     }
     return modificado;
@@ -104,16 +120,34 @@ TCalendario& TCalendario::operator=(const TCalendario &obj){
         this->dia = obj.dia;
         this->mes = obj.mes;
         this->anyo = obj.anyo;
+        
+        this->mensaje = new char[strlen(mensaje)];
+        strcpy(this->mensaje, mensaje);
     }
     return *this;
 }
 
 TCalendario TCalendario::operator+(int cantDias){
-    
+    TCalendario tcalendario(*this);
+
+    if(cantDias > 0)
+        for(int i = 0; i < cantDias; i++)
+            tcalendario++;    
+
+    (*this) = tcalendario;
+    return *this;   
 }
 
 TCalendario TCalendario::operator-(int cantDias){
-    //Poner como condicion d eparada que sea el 1/1/1900
+    //Poner como condicion de parada que sea el 1/1/1900
+    TCalendario tcalendario(*this);
+
+    if(cantDias > 0)
+        for(int i = 0; i < cantDias; i++)   //Se podría optimizar poniendo 1/1/1900 como cond.parada
+            tcalendario++;    
+
+    (*this) = tcalendario;
+    return *this;   
 }
 
 //Preincremento
@@ -217,12 +251,27 @@ TCalendario TCalendario::operator--(int cantDias){
         this->~TCalendario();
 
     return tcalendario;
-    
 }
 
 
 bool TCalendario::operator== (const TCalendario &obj){
-    bool same = (dia==obj.dia && mes==obj.mes && anyo==obj.anyo && strcmp(mensaje, obj.mensaje)) ? true : false;
+    bool same;
+    
+    if(dia==obj.dia && mes==obj.mes && anyo==obj.anyo){
+        if(this->mensaje == NULL){
+            if(obj.mensaje == NULL)
+                same = true;
+            else same = false;    
+        }
+        else if(obj.mensaje == NULL){
+            same = false;
+        }
+        else{
+            strcmp(mensaje, obj.mensaje) ? true : false;
+        }
+    }
+    else same = false;
+
     return same;
 }
 
@@ -230,7 +279,7 @@ bool TCalendario::operator!= (const TCalendario &obj){
     return !(*this==obj);
 }
 
-/*
+
 bool TCalendario::operator> (const TCalendario &obj){
     if(this->anyo > obj.anyo)
         return true;
@@ -242,18 +291,22 @@ bool TCalendario::operator> (const TCalendario &obj){
             && this->mensaje != obj.mensaje){
         if(this->mensaje == NULL)
             return false;
-        if(obj.mensaje == NULL)
+        else if(obj.mensaje == NULL)
             return true;
-        if(strcmp(this->mensaje, obj.mensaje) > 1)
-            return true
+        else{
+            if(strcmp(this->mensaje, obj.mensaje) == 0)
+                return false;
+            else if(strcmp(this->mensaje, obj.mensaje) > 0)
+                return true;
+            else return false;
+        }
     }
-
     return false;
 }
-*/
+
 
 bool TCalendario::operator< (const TCalendario &obj){
-
+    return !(*this>obj);
 }
 
 
@@ -285,5 +338,3 @@ ostream& operator<<(ostream &s, const TCalendario &obj){
 
     return s;
 }
-
-
