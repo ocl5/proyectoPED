@@ -317,6 +317,7 @@ bool TCalendario::EsVacio(){
 }
 
 ostream& operator<<(ostream &s, const TCalendario &obj){
+
     if(obj.dia < 10)
         s << "0" << obj.dia;
     else s << obj.dia;
@@ -335,6 +336,6 @@ ostream& operator<<(ostream &s, const TCalendario &obj){
         s << obj.mensaje;
     
     s << " \" ";
-
+    
     return s;
 }
