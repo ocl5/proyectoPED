@@ -10,15 +10,15 @@ TCalendario::TCalendario(){
     mensaje = NULL;
 }
 
-TCalendario::TCalendario(int dia, int mes, int anyo, char * mensaje){
+TCalendario::TCalendario(int dia, int mes, int anyo, char * m){
     if(comprobarFecha(dia, mes, anyo)){
         this->dia = dia;
         this->mes = mes;
         this->anyo = anyo;
 
-        if(mensaje == NULL){
-            this->mensaje = new char[strlen(mensaje)+1];
-            strcpy(this->mensaje, mensaje);
+        if(m != NULL){
+            this->mensaje = new char[strlen(m)+1];
+            strcpy(this->mensaje, m);
         }
         else this->mensaje = NULL;
     }
@@ -31,15 +31,23 @@ TCalendario::TCalendario(int dia, int mes, int anyo, char * mensaje){
 }
 
 TCalendario::TCalendario(const TCalendario &obj){
-    this->dia = obj.dia;
-    this->mes = obj.mes;
-    this->anyo = obj.anyo;
+    if(comprobarFecha(obj.dia, obj.mes, obj.anyo)){
+        this->dia = obj.dia;
+        this->mes = obj.mes;
+        this->anyo = obj.anyo;
 
-    if(obj.mensaje == NULL){
-        this->mensaje = new char[strlen(obj.mensaje)+1];
-        strcpy(this->mensaje, obj.mensaje);
+        if(obj.mensaje != NULL){
+            this->mensaje = new char[strlen(obj.mensaje)+1];
+            strcpy(this->mensaje, obj.mensaje);
+        }
+        else this->mensaje = NULL;
     }
-    else this->mensaje = NULL;
+    else{
+        this->dia = 1;
+        this->mes = 1;
+        this->anyo = 1900;
+        this->mensaje = NULL;
+    }
 }
 
 TCalendario::~TCalendario(){
@@ -47,8 +55,11 @@ TCalendario::~TCalendario(){
     this->mes = 1;
     this->anyo = 1900;
 
-    if(this->mensaje != NULL)
+    if(this->mensaje != NULL){
         delete [] this->mensaje;
+    }
+        
+    this->mensaje = NULL;
 }
 
 bool TCalendario::bisiesto(int anyo){
@@ -59,31 +70,24 @@ bool TCalendario::bisiesto(int anyo){
 
 bool TCalendario::comprobarFecha(int dia, int mes, int anyo){
     //Limites (dias negativos, +12 meses, +31 dias, <1900, mes-dias)
-    if(dia > 0 && dia <= 31 && mes <= 12 && anyo >= 1900){
+    if(dia > 0 && dia <= 31 && mes > 0 && mes <= 12 && anyo >= 1900){
 
         //Febrero bisiesto (max 29), sino (max 28)
-        if(bisiesto(anyo)){
-            if(mes == 2 && dia <= 29)
-                return true; 
-            else return false;
-        }
-        else{
-            if(mes == 2 && dia <= 28)
-                return true;
-            else return false;
-        }
-
+        if(bisiesto(anyo) && mes==2 && dia > 29)
+            return false; 
+        
+        else if(!bisiesto(anyo) && mes == 2 && dia > 28)
+                return false;
+        
         //Abril. junio, septiembre y noviembre (=30)
         if(mes == 4 || mes == 6 || mes == 9 || mes == 11){
-            if(dia <= 30)
-                return true;
-            else return false;
+            if(dia > 30)
+                return false;
         }
         return true;
     }
     return false;
 }
-
 
 bool TCalendario::ModFecha(int dia, int mes, int anyo){
     if(comprobarFecha(dia,mes,anyo)){
@@ -120,9 +124,15 @@ TCalendario& TCalendario::operator=(const TCalendario &obj){
         this->dia = obj.dia;
         this->mes = obj.mes;
         this->anyo = obj.anyo;
-        
-        this->mensaje = new char[strlen(mensaje)];
-        strcpy(this->mensaje, mensaje);
+
+        if(this->mensaje != NULL)
+            delete this->mensaje;
+        if(obj.mensaje == NULL)
+            this->mensaje = NULL;
+        else{
+            this->mensaje = new char[strlen(obj.mensaje) + 1];
+            strcpy(this->mensaje, obj.mensaje);
+        } 
     }
     return *this;
 }
@@ -130,47 +140,69 @@ TCalendario& TCalendario::operator=(const TCalendario &obj){
 TCalendario TCalendario::operator+(int cantDias){
     TCalendario tcalendario(*this);
 
-    if(cantDias > 0)
-        for(int i = 0; i < cantDias; i++)
-            tcalendario++;    
+    for(int i = 0; i < cantDias; i++){
+        tcalendario++; 
+    }
 
-    (*this) = tcalendario;
-    return *this;   
+    return tcalendario;   
 }
 
 TCalendario TCalendario::operator-(int cantDias){
-    //Poner como condicion de parada que sea el 1/1/1900
     TCalendario tcalendario(*this);
+    
+    for(int i = 0; i < cantDias; i++){   //Se podría optimizar poniendo 1/1/1900 como cond.parada
+        tcalendario--;
+    }
 
-    if(cantDias > 0)
-        for(int i = 0; i < cantDias; i++)   //Se podría optimizar poniendo 1/1/1900 como cond.parada
-            tcalendario++;    
+    if(!comprobarFecha(tcalendario.dia, tcalendario.mes, tcalendario.anyo)){
+        tcalendario.~TCalendario();
+    }
 
-    (*this) = tcalendario;
-    return *this;   
+    return tcalendario;   
 }
 
 //Preincremento
 TCalendario & TCalendario::operator++(){
-    dia++;
-
-    if(mes == 2 && dia ==29 && !bisiesto(this->anyo)){
-        dia = 1;
-        mes = 3;
+    if(mes == 2){
+        if(dia ==29 && bisiesto(anyo)){
+                dia = 1;
+                mes ++;             
+        }else if(dia==28 && !bisiesto(anyo)){
+                dia = 1;
+                mes++;
+        }
+        else{
+            dia++;
+        }        
     }
-    else if((mes == 1 || mes == 3 || mes == 5 || mes == 7 || mes == 8 ||
-             mes == 10 || mes == 12) && dia == 32){
-        dia = 1;
-        mes++;
-
-        if(mes == 13){
-            mes == 1;
+    else if(mes == 12 ){
+        if (dia == 31){
+            dia = 1;
             anyo++;
+            mes = 1;
+            
+        }else{
+            dia++;
         }
     }
-    else if(dia == 31){
-        dia = 1;
-        mes++;
+    else if(mes ==4|| mes ==6 || mes==9 || mes==11){
+        if(dia==30){
+            mes ++;
+            dia=1;
+        }
+        else{
+            dia ++;
+        }
+    }
+    else if(mes ==1|| mes ==3 || mes==5 || mes==7 ||mes ==8 ||mes ==10 ){
+        if(dia==31){
+            dia=1;
+            mes ++;
+            
+        }
+        else{
+            dia ++;
+        }
     }
     return *this;
 }
@@ -178,26 +210,47 @@ TCalendario & TCalendario::operator++(){
 //Postincremento
 TCalendario TCalendario::operator++(int cantDias){
     TCalendario tcalendario(*this);
-    dia++;
-    if(mes == 2 && dia == 29 && !bisiesto(this->anyo)){
-        dia == 1;
-        mes == 3;
+    if(mes == 2){
+        if(dia ==29 && bisiesto(anyo)){
+                dia = 1;
+                mes ++;             
+        }else if(dia==28 && !bisiesto(anyo)){
+                dia = 1;
+                mes++;
+        }
+        else{
+            dia++;
+        }        
     }
-    else if((mes == 1 || mes == 3 || mes == 5 || mes == 7 || mes == 8 ||
-             mes == 10 || mes == 12) && dia == 32){
-        dia = 1;
-        mes++;
-
-        if(mes == 13){
-            mes = 1;
+    else if(mes == 12 ){
+        if (dia == 31){
+            dia = 1;
             anyo++;
+            mes = 1;
+            
+        }else{
+            dia++;
         }
     }
-    else if(dia == 31){
-        dia = 1;
-        mes++;
+    else if(mes ==4|| mes ==6 || mes==9 || mes==11){
+        if(dia==30){
+            mes ++;
+            dia=1;
+        }
+        else{
+            dia ++;
+        }
     }
-
+    else if(mes ==1|| mes ==3 || mes==5 || mes==7 ||mes ==8 ||mes ==10 ){
+        if(dia==31){
+            dia=1;
+            mes ++;
+            
+        }
+        else{
+            dia ++;
+        }
+    }
     return tcalendario;
 }
 
@@ -206,7 +259,7 @@ TCalendario & TCalendario::operator--(){
     dia--;
     if(dia == 0){
         mes--;
-        if(mes = 0){
+        if(mes == 0){
             mes = 12;
             anyo--;
         }
@@ -220,12 +273,12 @@ TCalendario & TCalendario::operator--(){
         else dia = 30;
     }
 
-    if(!comprobarFecha(dia, mes, anyo))
+    if(!comprobarFecha(this->dia, this->mes, this->anyo)){
         this->~TCalendario();
+    }
 
     return *this;
 }
-
 
 //Postincremento
 TCalendario TCalendario::operator--(int cantDias){
@@ -233,7 +286,7 @@ TCalendario TCalendario::operator--(int cantDias){
     dia--;
     if(dia == 0){
         mes--;
-        if(mes = 0){
+        if(mes == 0){
             mes = 12;
             anyo--;
         }
@@ -247,38 +300,31 @@ TCalendario TCalendario::operator--(int cantDias){
         else dia = 30;
     }
 
-    if(!comprobarFecha(dia, mes, anyo))
+    if(!comprobarFecha(this->dia, this->mes, this->anyo)){
         this->~TCalendario();
+    }
 
     return tcalendario;
 }
 
-
 bool TCalendario::operator== (const TCalendario &obj){
-    bool same;
+    bool same = false;
     
     if(dia==obj.dia && mes==obj.mes && anyo==obj.anyo){
-        if(this->mensaje == NULL){
+        if(this->mensaje == NULL){    
             if(obj.mensaje == NULL)
                 same = true;
-            else same = false;    
         }
-        else if(obj.mensaje == NULL){
-            same = false;
-        }
-        else{
-            strcmp(mensaje, obj.mensaje) ? true : false;
+        else if (strcmp(mensaje, obj.mensaje) == 0){
+            same = true;
         }
     }
-    else same = false;
-
     return same;
 }
 
 bool TCalendario::operator!= (const TCalendario &obj){
     return !(*this==obj);
 }
-
 
 bool TCalendario::operator> (const TCalendario &obj){
     if(this->anyo > obj.anyo)
@@ -304,11 +350,11 @@ bool TCalendario::operator> (const TCalendario &obj){
     return false;
 }
 
-
 bool TCalendario::operator< (const TCalendario &obj){
-    return !(*this>obj);
+    if((*this)==obj)
+        return false;
+    else return !(*this>obj);
 }
-
 
 bool TCalendario::EsVacio(){
     if(dia == 1  && mes == 1 && anyo == 1900 && mensaje == NULL)
@@ -330,12 +376,12 @@ ostream& operator<<(ostream &s, const TCalendario &obj){
 
     s << "/";
     s << obj.anyo << " ";
-    s << " \" ";
+    s << "\"";
     
     if(obj.mensaje != NULL)
         s << obj.mensaje;
     
-    s << " \" ";
+    s << "\"";
     
     return s;
 }
