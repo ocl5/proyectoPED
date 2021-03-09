@@ -9,7 +9,7 @@ TVectorCalendario::TVectorCalendario(){
 }
 
 TVectorCalendario::TVectorCalendario(int tam){
-    if(tam < 0){
+    if(tam <= 0){
         this->tamano = 0;
         this->c = NULL;
     }
@@ -23,7 +23,7 @@ TVectorCalendario::TVectorCalendario(int tam){
     }
 }
 
-TVectorCalendario::TVectorCalendario( TVectorCalendario & obj){
+TVectorCalendario::TVectorCalendario(const TVectorCalendario & obj){
     this->tamano = obj.tamano;;
     this->c = new TCalendario [tamano];
 
@@ -32,7 +32,7 @@ TVectorCalendario::TVectorCalendario( TVectorCalendario & obj){
         return;
     }
     for(int i = 0; i < this->tamano; i++){
-        c[i] = obj.c[i];
+        c[i] = obj[i+1];
     }
     
 }
@@ -45,24 +45,20 @@ TVectorCalendario::~TVectorCalendario(){
     }
 }
 
-TVectorCalendario& TVectorCalendario::operator=(TVectorCalendario &obj){
-    if(this != &obj){
-        if(this->tamano = obj.tamano){
-            this->tamano = obj.tamano;
-            if(this->c != NULL)
-                delete this->c;
-            this->c = new TCalendario[this->tamano];
-            //Comprobamos que se ha asignado correctamente la memoria
-            if(this->c == NULL){
-                this->tamano = 0;
-                return *this;
-            }
+TVectorCalendario& TVectorCalendario::operator=(const TVectorCalendario &obj){
+if (this ==&obj)
+    {
+        return *this;
+        
+    }else{
+        (*this).~TVectorCalendario();
+        this->tamano =obj.tamano;
+        this->c=new TCalendario[tamano];
+        for (int i = 0; i < tamano; i++){
+            this->c[i]=obj[i+1];
         }
-        for(int i = 0; i < this->tamano; i++){
-            c[i] = obj.c[i];
-        }
+        return *this;
     }
-    return *this;
 }
 
 bool TVectorCalendario::operator==(TVectorCalendario &obj){
@@ -93,10 +89,6 @@ TCalendario TVectorCalendario::operator[](int numero) const{
     return error;
 }
 
-int TVectorCalendario::Tamano(){
-    return this->tamano;
-}
-
 int TVectorCalendario::Ocupadas(){
     int ocupadas = 0;
     for(int i = 0; i < this->tamano; i++)
@@ -112,6 +104,53 @@ bool TVectorCalendario::ExisteCal(TCalendario &obj){
     return false;
 }
 
-bool TVectorCalendario::Redimensionar(int tam){
+void TVectorCalendario::MostrarMensajes(int dia, int mes, int anyo){
     
+}
+
+bool TVectorCalendario::Redimensionar(int tam){
+    if(tam <= 0)
+        return false;
+    if(tam == this->tamano)
+        return false;
+
+    TCalendario *aux = new TCalendario[tam];
+    TCalendario *vacio = new TCalendario();
+
+    //El vector resultante sera mayor
+    if(tam > this->tamano){
+        for(int i = 0; i < tam; i++){
+            if(i < this->tamano)
+                aux[i] = this->c[i];
+            else aux[i] = (*vacio);
+        } 
+
+        (*this).~TVectorCalendario();   
+        this->c = aux;
+        this->tamano = tam;
+
+        return true;  
+    }
+    else{
+        for(int i = 0; i < tam; i++)
+            aux[i] = this->c[i];
+
+        (*this).~TVectorCalendario();   
+        this->c = aux;
+        this->tamano = tam;
+
+        return true;  
+    }
+}
+
+ostream& operator<<(ostream &s, const TVectorCalendario &obj){
+    s << "[";
+    for(int i = 1; i <= obj.tamano; i++){
+        s << "(" << i <<") " << obj[i];
+        if(i!= obj.tamano)
+            s << ", "; 
+    }
+    s<< "]";
+
+    return s;
 }

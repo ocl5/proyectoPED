@@ -118,7 +118,6 @@ bool TCalendario::ModMensaje(char * mensaje){
 }
 
 TCalendario& TCalendario::operator=(const TCalendario &obj){
-
     if(this != &obj){   //Protección contra autoasignacion
         (*this).~TCalendario();
         this->dia = obj.dia;

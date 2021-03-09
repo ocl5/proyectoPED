@@ -7,7 +7,7 @@ using namespace std;
 #include "tcalendario.h"
 
 class TVectorCalendario {
-    friend ostream & operator<<(ostream &, TVectorCalendario &);
+    friend ostream & operator<<(ostream &, const TVectorCalendario &);
 
     private:
         TCalendario *c;
@@ -17,10 +17,10 @@ class TVectorCalendario {
     public:
         TVectorCalendario();
         TVectorCalendario(int);
-        TVectorCalendario(TVectorCalendario &);
+        TVectorCalendario(const TVectorCalendario &);
         ~TVectorCalendario();
 
-        TVectorCalendario & operator= (TVectorCalendario &);
+        TVectorCalendario & operator= (const TVectorCalendario &);
 
         bool operator==(TVectorCalendario &);
         bool operator!=(TVectorCalendario &);
@@ -32,7 +32,7 @@ class TVectorCalendario {
         TCalendario operator[](int) const;
 
         // Tamaño del vector (posiciones TOTALES)
-        int Tamano();
+        int Tamano(){return this->tamano;};
         // Cantidad de posiciones OCUPADAS (no vacías) en el vector
         int Ocupadas();
         // Devuelve TRUE si existe el calendario en el vector
