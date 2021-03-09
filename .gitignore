@@ -1,2 +1,2 @@
 /lib/*.o
-/pruebas/*.out
+/pruebas/*/*.out
