@@ -98,9 +98,12 @@ int TVectorCalendario::Ocupadas(){
 }
 
 bool TVectorCalendario::ExisteCal(TCalendario &obj){
-    for(int i = 0; i < this->tamano; i++)
-        if(this->c[i] == obj)
+
+    for(int i = 0; i < this->tamano; i++){       
+        if(obj == this->c[i]){
             return true;
+        } 
+    } 
     return false;
 }
 
